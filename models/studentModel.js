@@ -1,3 +1,4 @@
+const bcrypt = require('bcryptjs/dist/bcrypt');
 const mongoose = require('mongoose');
 
 const studentModel = mongoose.Schema({
@@ -10,6 +11,7 @@ const studentModel = mongoose.Schema({
     },
     password: {
         type: String,
+        select: false,
         required: [true, "password is required"],
         maxLength: [15, "password is too long"],
         minLength: [4, "password is too short"],
@@ -19,5 +21,23 @@ const studentModel = mongoose.Schema({
     },
 
 }, { timestamps: true });
+
+// generate salt from password
+studentModel.pre("save", function () {
+    // only hash the password if it has been modified (or is new)
+    if (!this.ismodified("password")) {
+        return
+    }
+    let salt = bcrypt.genSaltSync(10);
+    this.password = bcrypt.hashSync(this.password, salt);
+})
+
+//  compare password creating function method
+
+studentModel.methods.comparePassword = function (password){
+    return bcrypt.compareSync(password, this.password);
+}
+
+
 
 module.exports = mongoose.model('Student', studentModel);
