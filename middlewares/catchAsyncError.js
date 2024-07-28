@@ -1,3 +1,6 @@
+
+// try catch
 exports.catchAsyncErrors = (func) => (req, res, next) => {
-    Promise.res(func(req, res, next)).catch(next)
+    Promise.resolve(func(req, res, next)).catch(next)
 };
+
